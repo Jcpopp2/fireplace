@@ -21,6 +21,7 @@ const state={
   openSection:0, openGroup:"0:0",
   selected:new Set(), paintMode:"brush", brush:"#FF5005",
   undo:[], playing:false, playRAF:null, playStart:0, playIndex:0,
+  multiSelect:false, treeSelection:[],
   effect:{
     type:"Wipe", randomMode:"None", mode:"insert", destination:"Start new group",
     groupName:"Wipe", existingGroup:"0:0", newSection:0,
@@ -105,7 +106,9 @@ function renderTree(){
 function treeRow(type,pos,name,count,open){
   const d=document.createElement("div");d.className=`tree-row ${type}`;
   d.dataset.type=type;Object.entries(pos).forEach(([k,v])=>d.dataset[k]=v);
-  const selected=(type==="section"&&state.cur.s===pos.s)||(type==="group"&&state.cur.s===pos.s&&state.cur.g===pos.g)||(type==="frame"&&state.cur.s===pos.s&&state.cur.g===pos.g&&state.cur.f===pos.f);
+  const key=treeKey(type,pos);
+  const selected=state.multiSelect ? state.treeSelection.includes(key) :
+    ((type==="section"&&state.cur.s===pos.s)||(type==="group"&&state.cur.s===pos.s&&state.cur.g===pos.g)||(type==="frame"&&state.cur.s===pos.s&&state.cur.g===pos.g&&state.cur.f===pos.f));
   if(selected)d.classList.add("selected");
   const disc=document.createElement("button");disc.className="disclosure";
   disc.textContent=type==="frame"?"•":(open?"−":"+");
@@ -113,8 +116,39 @@ function treeRow(type,pos,name,count,open){
   const nm=document.createElement("div");nm.className="tree-name";nm.textContent=name;
   const ct=document.createElement("span");ct.className="count";ct.textContent=count;
   d.append(disc,nm,ct);
-  d.addEventListener("click",()=>selectTree(type,pos));
+  d.addEventListener("click",()=>state.multiSelect?toggleTreeSelection(type,pos):selectTree(type,pos));
   return d;
+}
+
+function treeKey(type,pos){
+  if(type==="section")return `s:${pos.s}`;
+  if(type==="group")return `g:${pos.s}:${pos.g}`;
+  return `f:${pos.s}:${pos.g}:${pos.f}`;
+}
+function parseTreeKey(key){
+  const p=key.split(":");
+  if(p[0]==="s")return {type:"section",s:+p[1]};
+  if(p[0]==="g")return {type:"group",s:+p[1],g:+p[2]};
+  return {type:"frame",s:+p[1],g:+p[2],f:+p[3]};
+}
+function toggleTreeSelection(type,pos){
+  const key=treeKey(type,pos),i=state.treeSelection.indexOf(key);
+  if(i>=0)state.treeSelection.splice(i,1);else state.treeSelection.push(key);
+  $("#selectionHint").textContent=`${state.treeSelection.length} selected`;
+  renderTree();
+}
+function toggleMultiSelect(){
+  state.multiSelect=!state.multiSelect;
+  state.treeSelection=[];
+  $("#multiSelectBtn").textContent=state.multiSelect?"Done":"Select Multiple";
+  $("#selectionHint").textContent=state.multiSelect?"Tap items to add/remove":"tap to select";
+  renderTree();
+}
+function selectedTreeItemsSameType(){
+  const items=state.treeSelection.map(parseTreeKey);
+  if(!items.length)return [];
+  const type=items[0].type;
+  return items.filter(x=>x.type===type);
 }
 function toggleOpen(type,pos){
   if(type==="section"){state.openSection=pos.s;state.openGroup=`${pos.s}:0`;state.cur.s=pos.s;state.cur.g=0;state.cur.f=0}
@@ -129,6 +163,79 @@ function selectTree(type,pos){
 }
 function activeLevel(){
   const active=$("#tree .tree-row.selected");return active?.dataset.type||"frame";
+}
+
+function deleteSelectedMulti(){
+  if(!state.multiSelect||!state.treeSelection.length){deleteContext();return}
+  const items=selectedTreeItemsSameType();if(!items.length)return;
+  snapshot("delete selected");
+  if(items[0].type==="section"){
+    const idx=[...new Set(items.map(x=>x.s))].sort((a,b)=>b-a);
+    if(idx.length>=state.sections.length){state.undo.pop();alert("At least one Section must remain.");return}
+    idx.forEach(i=>state.sections.splice(i,1));
+  }else if(items[0].type==="group"){
+    const by={};items.forEach(x=>(by[x.s]??=[]).push(x.g));
+    for(const [ss,arr] of Object.entries(by)){
+      const s=+ss,a=state.sections[s].groups,idx=[...new Set(arr)].sort((x,y)=>y-x);
+      if(idx.length>=a.length){state.undo.pop();alert("At least one Group must remain in each Section.");return}
+      idx.forEach(i=>a.splice(i,1));
+    }
+  }else{
+    const by={};items.forEach(x=>{const k=`${x.s}:${x.g}`;(by[k]??=[]).push(x.f)});
+    for(const [k,arr] of Object.entries(by)){
+      const [s,g]=k.split(":").map(Number),a=state.sections[s].groups[g].frames,idx=[...new Set(arr)].sort((x,y)=>y-x);
+      if(idx.length>=a.length){state.undo.pop();alert("At least one Frame must remain in each Group.");return}
+      idx.forEach(i=>a.splice(i,1));
+    }
+  }
+  state.multiSelect=false;state.treeSelection=[];
+  $("#multiSelectBtn").textContent="Select Multiple";$("#selectionHint").textContent="tap to select";
+  state.cur={s:0,g:0,f:0};state.openSection=0;state.openGroup="0:0";
+  render();
+}
+function moveSelected(delta){
+  const items=selectedTreeItemsSameType();if(!items.length)return;
+  const type=items[0].type;snapshot("move selected "+type);
+  if(type==="section"){
+    let idx=[...new Set(items.map(x=>x.s))].sort((a,b)=>a-b);
+    if(delta<0){
+      for(const i of idx){if(i<=0||idx.includes(i-1))continue;[state.sections[i-1],state.sections[i]]=[state.sections[i],state.sections[i-1]]}
+      idx=idx.map(i=>Math.max(0,i-1));
+    }else{
+      for(const i of [...idx].reverse()){if(i>=state.sections.length-1||idx.includes(i+1))continue;[state.sections[i+1],state.sections[i]]=[state.sections[i],state.sections[i+1]]}
+      idx=idx.map(i=>Math.min(state.sections.length-1,i+1));
+    }
+    state.treeSelection=idx.map(i=>`s:${i}`);
+  }else if(type==="group"){
+    const by={};items.forEach(x=>(by[x.s]??=[]).push(x.g));const next=[];
+    for(const [ss,arr] of Object.entries(by)){
+      const s=+ss,a=state.sections[s].groups;let idx=[...new Set(arr)].sort((x,y)=>x-y);
+      if(delta<0){
+        for(const i of idx){if(i<=0||idx.includes(i-1))continue;[a[i-1],a[i]]=[a[i],a[i-1]]}
+        idx=idx.map(i=>Math.max(0,i-1));
+      }else{
+        for(const i of [...idx].reverse()){if(i>=a.length-1||idx.includes(i+1))continue;[a[i+1],a[i]]=[a[i],a[i+1]]}
+        idx=idx.map(i=>Math.min(a.length-1,i+1));
+      }
+      idx.forEach(i=>next.push(`g:${s}:${i}`));
+    }
+    state.treeSelection=next;
+  }else{
+    const by={};items.forEach(x=>{const k=`${x.s}:${x.g}`;(by[k]??=[]).push(x.f)});const next=[];
+    for(const [k,arr] of Object.entries(by)){
+      const [s,g]=k.split(":").map(Number),a=state.sections[s].groups[g].frames;let idx=[...new Set(arr)].sort((x,y)=>x-y);
+      if(delta<0){
+        for(const i of idx){if(i<=0||idx.includes(i-1))continue;[a[i-1],a[i]]=[a[i],a[i-1]]}
+        idx=idx.map(i=>Math.max(0,i-1));
+      }else{
+        for(const i of [...idx].reverse()){if(i>=a.length-1||idx.includes(i+1))continue;[a[i+1],a[i]]=[a[i],a[i+1]]}
+        idx=idx.map(i=>Math.min(a.length-1,i+1));
+      }
+      idx.forEach(i=>next.push(`f:${s}:${g}:${i}`));
+    }
+    state.treeSelection=next;
+  }
+  renderTree();$("#selectionHint").textContent=`${state.treeSelection.length} selected`;
 }
 function moveCurrent(delta){
   const level=activeLevel();snapshot("move "+level);
@@ -175,7 +282,8 @@ document.addEventListener("click",e=>{
     "color-selected":colorSelected,"select-all":()=>{state.selected=new Set([...Array(48).keys()]);renderStage()},
     "clear-selection":()=>{state.selected.clear();renderStage()},
     effects:openEffects,"close-effects":closeEffects,"generate-effect":generateEffect,
-    "move-up":()=>moveCurrent(-1),"move-down":()=>moveCurrent(1),
+    "move-up":()=>state.multiSelect?moveSelected(-1):moveCurrent(-1),"move-down":()=>state.multiSelect?moveSelected(1):moveCurrent(1),
+    "toggle-multiselect":toggleMultiSelect,"delete-selected":deleteSelectedMulti,
     "save-json":saveJSON,"generate-arduino":showArduino,"export-ino":exportINO,
     "close-code":()=>$("#codeSheet").classList.add("hidden"),"copy-code":copyCode
   };
@@ -247,7 +355,7 @@ effectDestination.addEventListener("change",()=>{state.effect.destination=effect
 
 function openEffects(){
   effectType.value=state.effect.type;randomMode.value=state.effect.randomMode;effectMode.value=state.effect.mode;effectDestination.value=state.effect.destination;
-  state.effect.groupName=state.effect.type;renderDestination();renderEffectFields();$("#effectSheet").classList.remove("hidden");
+  state.effect.groupName=state.effect.type;renderDestination();renderEffectFields();$("#effectSheet").classList.remove("hidden");requestAnimationFrame(()=>{$("#effectSheet .sheet-scroll").scrollTop=0});
 }
 function closeEffects(){$("#effectSheet").classList.add("hidden")}
 function groupOptions(){const out=[];state.sections.forEach((s,si)=>s.groups.forEach((g,gi)=>out.push({value:`${si}:${gi}`,label:`${s.name} / ${g.name}`})));return out}
@@ -483,3 +591,8 @@ __ACTIONS__
 
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
 render();
+
+// iPad: allow the effect sheet itself to scroll without the background page stealing the gesture.
+document.addEventListener("touchmove",e=>{
+  if(!$("#effectSheet").classList.contains("hidden")&&!e.target.closest(".sheet-scroll"))e.preventDefault();
+},{passive:false});

@@ -69,3 +69,80 @@ input[type=color]{padding:3px;width:58px}
   .workspace{grid-template-columns:1fr}.sidebar{max-height:34vh}.led-stage{min-height:360px}
   .sheet{grid-template-columns:1fr}.sheet-backdrop{display:none}.sheet-panel{width:100%}.form-grid{grid-template-columns:1fr 1fr}
 }
+
+/* ---- iPad landscape / V2 refinements ---- */
+html,body{height:100%;overflow:hidden}
+#app{height:100dvh;min-height:100dvh;overflow:hidden}
+.topbar,.toolbar,.paintbar,.bottombar{padding-block:5px}
+.topbar{padding-top:max(5px,env(safe-area-inset-top))}
+.workspace{
+  flex:1 1 auto;
+  min-height:0;
+  height:auto;
+  grid-template-columns:minmax(0,1fr) 245px;
+  gap:6px;
+  padding:6px;
+}
+.stage-card,.sidebar{height:100%;min-height:0}
+.stage-head{padding:6px 9px;min-height:42px}
+.led-stage{min-height:0;padding:12px 8px;gap:10px}
+.pane{height:100%;min-height:150px;max-height:none;padding:6px}
+.sidebar-head{padding:6px 7px}
+.sidebar-title-row{display:flex;align-items:center;justify-content:space-between;gap:5px}
+.compact-btn{min-height:32px!important;padding:4px 7px!important;font-size:11px}
+.tree-row{min-height:35px;padding:3px 5px}
+.disclosure{width:30px;height:30px;flex:0 0 30px}
+.sidebar-footer{padding:4px;display:grid;grid-template-columns:1fr 1fr 1fr}
+.bottombar{padding-bottom:max(5px,env(safe-area-inset-bottom))}
+.sheet{
+  height:100dvh;
+  max-height:100dvh;
+  overflow:hidden;
+}
+.sheet-panel{
+  height:100dvh;
+  max-height:100dvh;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.sheet-head{flex:0 0 auto;padding:7px 9px}
+.sheet-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto!important;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+  padding:8px 10px 28px;
+}
+.sheet-actions{
+  flex:0 0 auto;
+  padding:6px 9px max(6px,env(safe-area-inset-bottom));
+  background:var(--panel);
+}
+.form-section{margin:7px 0;padding:8px}
+.field-row{margin:5px 0}
+.form-grid{gap:7px}
+.form-grid label,.field-row label{font-size:11px}
+@media (orientation:landscape) and (max-height:850px){
+  .title{font-size:17px}.version{display:none}
+  button,.file-btn{min-height:36px;padding:5px 9px}
+  input,select{min-height:36px;padding:4px 7px}
+  .toolbar,.paintbar{font-size:13px}
+  .paintbar{min-height:40px}
+  .workspace{grid-template-columns:minmax(0,1fr) 225px}
+  .stage-head{min-height:38px}
+  .led-stage{padding:8px 6px;gap:7px}
+  .pane{min-height:135px}
+  .sheet{grid-template-columns:1fr min(500px,92vw)}
+}
+@media (orientation:landscape) and (max-height:650px){
+  .topbar,.toolbar,.paintbar,.bottombar{padding-block:3px}
+  .title{font-size:15px}
+  .stage-head{padding:4px 7px}
+  .led-stage{padding:6px 5px}
+  .pane-title{top:-19px}
+}

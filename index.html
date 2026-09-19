@@ -67,13 +67,17 @@
 
     <aside class="sidebar">
       <div class="sidebar-head">
-        <strong>Sections / Groups / Frames</strong>
-        <span class="muted small">tap to select</span>
+        <div class="sidebar-title-row">
+          <strong>Sections / Groups / Frames</strong>
+          <button id="multiSelectBtn" data-action="toggle-multiselect" class="compact-btn">Select Multiple</button>
+        </div>
+        <span class="muted small" id="selectionHint">tap to select</span>
       </div>
       <div id="tree" class="tree"></div>
       <div class="sidebar-footer">
         <button data-action="move-up">↑ Move</button>
         <button data-action="move-down">↓ Move</button>
+        <button data-action="delete-selected">Delete</button>
       </div>
     </aside>
   </main>

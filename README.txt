@@ -62,3 +62,12 @@ NOTES
 - iPadOS installation requires serving the folder from HTTPS.
 - Browser downloads on iPad go through Safari/Files.
 - Drag/drop hierarchy movement has been represented as touch-friendly Move Up/Move Down controls in this initial port. That is a deliberate touch adaptation and can be upgraded to direct long-press drag in a later PWA version.
+
+
+PWA V2 IPAD IMPROVEMENTS
+- More compact landscape layout.
+- Effect Generator scrolls independently in landscape mode.
+- Sticky bottom controls remain reachable.
+- Select Multiple mode for Sections, Groups, or Frames.
+- Bulk Delete.
+- Bulk Move Up / Move Down while preserving selected-item order.
