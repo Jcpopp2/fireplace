@@ -1,0 +1,71 @@
+:root{
+  color-scheme:dark;
+  --bg:#111318;--panel:#20242b;--panel2:#15191f;--text:#e8e8e8;--muted:#9da4ae;
+  --accent:#55b7ff;--line:#343b45;--danger:#ff6b6b;--radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overscroll-behavior:none}
+button,input,select,textarea{font:inherit}
+button,.file-btn{
+  min-height:42px;border:1px solid #434b57;border-radius:10px;background:#2a3038;color:var(--text);
+  padding:8px 12px;touch-action:manipulation
+}
+button:active,.file-btn:active{transform:scale(.98)}
+button.accent{background:var(--accent);color:#071019;border-color:var(--accent);font-weight:700}
+button:disabled{opacity:.45}
+input,select{min-height:42px;background:#11151a;color:var(--text);border:1px solid #46505d;border-radius:9px;padding:7px 9px;width:100%}
+input[type=color]{padding:3px;width:58px}
+#app{min-height:100%;display:flex;flex-direction:column}
+.topbar,.toolbar,.paintbar,.bottombar{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:rgba(17,19,24,.97)}
+.topbar{padding-top:max(8px,env(safe-area-inset-top));justify-content:space-between}
+.title{font-size:20px;font-weight:800}.version{font-size:12px;color:var(--muted);font-weight:500}
+.top-actions,.toolgroup{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.toolbar,.paintbar{overflow-x:auto;flex-wrap:nowrap}
+.duration-wrap{min-width:120px}.duration-wrap label{font-size:12px;color:var(--muted)}
+.paintbar{background:#181c22}
+.segmented{display:flex;border:1px solid #46505d;border-radius:10px;overflow:hidden;min-width:max-content}
+.segmented button{border:0;border-radius:0;min-height:40px}.segmented button.active{background:var(--accent);color:#071019}
+.color-chip{display:flex;align-items:center;gap:6px;color:var(--muted);white-space:nowrap}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:10px;padding:10px;flex:1;min-height:0}
+.stage-card,.sidebar{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;min-height:0}
+.stage-card{display:flex;flex-direction:column}
+.stage-head{padding:10px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.stage-nav{display:flex;gap:5px}
+.led-stage{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:24px 18px;align-items:center;touch-action:none;user-select:none}
+.pane{height:min(52vh,360px);min-height:220px;border:2px solid #4a5360;border-radius:10px;background:#171b20;display:flex;align-items:center;padding:10px;position:relative}
+.pane-title{position:absolute;top:-24px;width:100%;left:0;text-align:center;color:var(--muted);font-size:13px}
+.led-row{width:100%;display:grid;grid-template-columns:repeat(16,1fr);align-items:center}
+.led{aspect-ratio:1/1;border-radius:50%;border:1px solid #7b8490;transform:scale(1.02);min-width:14px;box-shadow:0 0 13px color-mix(in srgb,var(--led-color) 42%, transparent);background:var(--led-color);touch-action:none}
+.led.selected{outline:3px solid #fff;outline-offset:2px}
+.sidebar{display:flex;flex-direction:column}.sidebar-head{padding:10px;border-bottom:1px solid var(--line)}
+.tree{flex:1;overflow:auto;padding:5px}.sidebar-footer{display:flex;gap:5px;padding:7px;border-top:1px solid var(--line)}
+.tree-row{display:flex;align-items:center;gap:6px;border-radius:8px;min-height:38px;padding:5px 7px;margin:2px 0;border:1px solid transparent}
+.tree-row.selected{background:#29475d;border-color:#3d7698}
+.tree-row.section{font-weight:800}.tree-row.group{margin-left:16px;font-weight:650}.tree-row.frame{margin-left:34px;color:#d2d7dd}
+.disclosure{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:#2e353e;font-size:18px;flex:0 0 32px}
+.tree-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.count{color:var(--muted);font-size:11px}
+.bottombar{border-top:1px solid var(--line);border-bottom:0;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.file-btn{display:inline-flex;align-items:center}.file-btn input{display:none}
+.status{color:var(--muted);font-size:12px;margin-left:5px}
+.muted{color:var(--muted)}.small{font-size:11px}
+.sheet{position:fixed;inset:0;z-index:50;display:grid;grid-template-columns:1fr min(540px,94vw)}
+.sheet.hidden{display:none}.sheet-backdrop{background:rgba(0,0,0,.48)}
+.sheet-panel{background:var(--panel);border-left:1px solid var(--line);height:100%;display:flex;flex-direction:column;padding-top:max(0px,env(safe-area-inset-top))}
+.sheet-head,.sheet-actions{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:12px;border-bottom:1px solid var(--line)}
+.sheet-actions{border-top:1px solid var(--line);border-bottom:0}
+.sheet-scroll{overflow:auto;padding:12px;flex:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-grid label,.field-row label{font-size:12px;color:var(--muted)}
+.form-section{margin:12px 0;padding:10px;border:1px solid var(--line);border-radius:12px;background:#191d23}
+.form-section h3{margin:0 0 9px;font-size:14px}
+.field-row{display:grid;grid-template-columns:minmax(110px,1fr) 1.45fr;gap:9px;align-items:center;margin:7px 0}
+.minmax{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.minmax label{display:flex;flex-direction:column;gap:3px;font-size:10px}
+.code-panel{width:min(820px,96vw)}#arduinoOutput{flex:1;margin:12px;resize:none;background:#0b0d10;color:#dbe3ed;border:1px solid var(--line);border-radius:10px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+@media(max-width:900px){
+  .workspace{grid-template-columns:1fr 240px}.led-stage{gap:9px;padding:22px 8px}.pane{padding:5px}
+}
+@media(max-width:720px){
+  .workspace{grid-template-columns:1fr}.sidebar{max-height:34vh}.led-stage{min-height:360px}
+  .sheet{grid-template-columns:1fr}.sheet-backdrop{display:none}.sheet-panel{width:100%}.form-grid{grid-template-columns:1fr 1fr}
+}

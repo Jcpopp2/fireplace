@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#111318">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TV LED Studio">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>TV LED Studio</title>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="title">TV LED Studio <span class="version">iPad PWA V1</span></div>
+    <div class="top-actions">
+      <button data-action="undo" id="undoBtn" disabled>Undo</button>
+      <button data-action="play">▶ Play</button>
+      <button data-action="stop">■ Stop</button>
+      <button data-action="effects" class="accent">Effects</button>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="toolgroup">
+      <button data-action="new-frame">+ Frame</button>
+      <button data-action="duplicate">Duplicate</button>
+      <button data-action="delete">Delete</button>
+      <button data-action="new-group">+ Group</button>
+      <button data-action="new-section">+ Section</button>
+      <button data-action="rename">Rename</button>
+    </div>
+    <div class="toolgroup duration-wrap">
+      <label>Frame sec <input id="durationInput" type="number" min="0.02" max="60" step="0.01" value="1"></label>
+    </div>
+  </section>
+
+  <section class="paintbar">
+    <div class="segmented" id="paintModes">
+      <button data-mode="brush" class="active">Brush</button>
+      <button data-mode="select">Select Brush</button>
+      <button data-mode="erase">Erase</button>
+    </div>
+    <label class="color-chip">Brush <input id="brushColor" type="color" value="#ff5005"></label>
+    <button data-action="color-selected">Color Selected</button>
+    <button data-action="select-all">Select All</button>
+    <button data-action="clear-selection">Clear</button>
+  </section>
+
+  <main class="workspace">
+    <section class="stage-card">
+      <div class="stage-head">
+        <div>
+          <strong id="frameBreadcrumb">Section 1 / Scene 1 / Frame 1</strong>
+          <div class="muted" id="frameCounter">Frame 1 / 1</div>
+        </div>
+        <div class="stage-nav">
+          <button data-action="prev-frame">◀</button>
+          <button data-action="next-frame">▶</button>
+        </div>
+      </div>
+      <div id="ledStage" class="led-stage" aria-label="LED editor"></div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <strong>Sections / Groups / Frames</strong>
+        <span class="muted small">tap to select</span>
+      </div>
+      <div id="tree" class="tree"></div>
+      <div class="sidebar-footer">
+        <button data-action="move-up">↑ Move</button>
+        <button data-action="move-down">↓ Move</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="bottombar">
+    <button data-action="save-json">Save Project</button>
+    <label class="file-btn">Load Project<input id="loadJson" type="file" accept=".json,application/json"></label>
+    <button data-action="generate-arduino" class="accent">Arduino Code</button>
+    <button data-action="export-ino">Export .ino</button>
+    <span id="status" class="status"></span>
+  </footer>
+</div>
+
+<div id="effectSheet" class="sheet hidden">
+  <div class="sheet-backdrop" data-action="close-effects"></div>
+  <div class="sheet-panel">
+    <div class="sheet-head">
+      <div><strong>Effect Generator</strong><div class="muted small">touch-friendly runtime/random editor</div></div>
+      <button data-action="close-effects">✕</button>
+    </div>
+    <div class="sheet-scroll">
+      <div class="form-grid">
+        <label>Effect<select id="effectType"></select></label>
+        <label>Random mode<select id="randomMode">
+          <option>None</option>
+          <option>Random Color</option>
+          <option>Randomize Chosen Effect</option>
+          <option>Randomize Everything</option>
+        </select></label>
+        <label>Mode<select id="effectMode"><option>insert</option><option>overlay</option></select></label>
+        <label>Add effect to<select id="effectDestination"><option>Start new group</option><option>Add to existing group</option></select></label>
+      </div>
+      <div id="destinationFields"></div>
+      <div id="effectFields"></div>
+    </div>
+    <div class="sheet-actions">
+      <button data-action="generate-effect" class="accent">Generate Effect</button>
+      <button data-action="close-effects">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="codeSheet" class="sheet hidden">
+  <div class="sheet-backdrop" data-action="close-code"></div>
+  <div class="sheet-panel code-panel">
+    <div class="sheet-head">
+      <strong>Generated Arduino Code</strong>
+      <button data-action="close-code">✕</button>
+    </div>
+    <textarea id="arduinoOutput" spellcheck="false"></textarea>
+    <div class="sheet-actions">
+      <button data-action="copy-code" class="accent">Copy All</button>
+      <button data-action="close-code">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
